@@ -23,6 +23,7 @@ reserved ={
 'p':'POS_P',
 'm':'POS_M',
 'q':'POS_Q',
+'i':'POS_I',
 'ROOT':'SYN_ROOT',
 'SBV':'SYN_SBV',		
 'ADV':'SYN_ADV',
@@ -171,18 +172,22 @@ def p_vobphrase_LEFT_RIGHT(p):
   'vobphrase : LEFT vobphrase RIGHT'
   p[0] = ['vobphrase',p[2][1],p[2][2]]
 
-def p_fobphrase_nphrase_fob_pobphrase_adv_vphrase(p):
+def p_fobphrase_nphrase_fob_pobphrase_adv_vphrase(p):# 前置宾语：凶手被抓住了
   'fobphrase : nphrase SYN_FOB pobphrase SYN_ADV vphrase'
   p[0] = ['fobphrase',p[5][1],p[1][2]*p[5][2]]
 
 
-def p_nphrase_aphrase_att_nphrase(p): #定中结构
+def p_nphrase_aphrase_att_nphrase(p): #定中结构，形容词修饰名词
   'nphrase : aphrase SYN_ATT nphrase'
   p[0] =['nphrase',p[3][1],p[1][2]*p[3][2]]
 
-def p_nphrase_nphrase_nphrase_att(p):
+def p_nphrase_nphrase_att_nphrase(p): #定中结构,A的B
   'nphrase : nphrase SYN_ATT nphrase'
   p[0] = ['nphrase',p[1][1],p[1][2]]
+
+def p_iphrase_nphrase_att_nphrase(p): #定中结构 成语做形容词
+  'nphrase : iphrase SYN_ATT nphrase'
+  p[0] = ['nphrase',p[1][1],p[1][2]*p[3][2]]
 
 def p_nphrase_nphrase_uphrase_rad(p):#定中结构，右边是语气词（感叹句）
   'nphrase : nphrase uphrase SYN_RAD'
@@ -224,6 +229,10 @@ def p_vphrase_dphrase_adv_vphrase(p):
   'vphrase : dphrase SYN_ADV vphrase'
   p[0] = ['vphrase',p[3][1],p[1][2]*p[3][2]]
 
+def p_vphrase_iphrase_adv_vphrase(p):
+  'vphrase : iphrase SYN_ADV vphrase'
+  p[0] = ['vphrase',p[3][1],p[1][2]*p[3][2]]
+
 def p_vphrase_pobphrase(p):
   'vphrase : pobphrase SYN_POB vphrase'
   p[0] = ['vphrase',p[3][1],p[1][2]*p[3][2]]
@@ -235,7 +244,7 @@ def p_vhrase_vphrase_vphrase_cmp(p):
   p[0] = ['vphrase',p[1][1],p[1][2]*p[2][2]]
 '''
 
-def p_posv_posv_cmp(p):
+def p_posv_posv_cmp(p): #动补结构
   'vphrase : POS_V POS_V SYN_CMP'
   p[0] = ['vphrase',p[1][1],p[1][2]*p[2][2]]
 
@@ -243,7 +252,7 @@ def p_vphrase_v(p):
   'vphrase : POS_V'
   p[0] = ['vphrase',p[1][1],p[1][2]]
 
-def p_vphrase_vphrase_uphrase_rad(p):
+def p_vphrase_vphrase_uphrase_rad(p): #动词加的/地
   'vphrase : vphrase uphrase SYN_RAD'
   p[0] = ['vphrase',p[1][1],p[1][2]]
 
@@ -255,10 +264,17 @@ def p_dphrase_d(p):
   'dphrase : dphrase SYN_ADV pobphrase'
   p[0] = ['dphrase',p[1][1],p[1][2]*p[3][2]]
 
-def p_dhrase_d(p):
+def p_dphrase_d(p):
   'dphrase : POS_D'
   p[0] = ['dphrase',p[1][1],p[1][2]]
 
+def p_dphrase_uphrase_rad(p):
+  'dphrase : dphrase uphrase SYN_RAD'
+  p[0] = ['dphrase',p[1][1],p[1][2]]
+
+def p_dphrase_LEFT_dphrase_RIGHT(p):
+  'dphrase : LEFT dphrase RIGHT'
+  p[0] = ['dphrase',p[2][1],p[2][2]]
 
 def p_uphrase_u(p):
   'uphrase : POS_U'
@@ -278,7 +294,7 @@ def p_aphrase_d_ADV_a(p):
   'aphrase : dphrase SYN_ADV aphrase'#副词+形容词的形容词短语
   p[0] = ['aphrase',p[1][1],p[1][2]*p[3][2]]
 
-def p_aphrase_a(p):
+def p_aphrase_a(p): #形容词短语
   'aphrase : POS_A'
   p[0] = ['aphrase',p[1][1],p[1][2]]
 
@@ -286,7 +302,7 @@ def p_aphrase_LEFT_RIGHT(p):
   'aphrase : LEFT aphrase RIGHT'
   p[0] = ['aphrase',p[2][1],p[2][2]]
 
-def p_pobphrase_p_pob_nphrase(p):
+def p_pobphrase_p_pob_nphrase(p):  #介宾短语
   'pobphrase : POS_P nphrase SYN_POB'
   p[0] = ['pobphrase',p[2][1],p[2][2]]
 
@@ -294,9 +310,21 @@ def p_pobphrase_LEFT_RIGHT(p):
   'pobphrase : LEFT pobphrase RIGHT'
   p[0] = ['pobphrase',p[2][1],p[2][2]]
 
-def p_mqphrase_m_att_q(p):
+def p_mqphrase_m_att_q(p): #数量词短语
   'mqphrase : POS_M SYN_ATT POS_Q'
   p[0] = ['mqphrase',p[1][1],p[1][2]]
+
+def p_iphrase_i(p):   #成语
+  'iphrase : POS_I'
+  p[0] = ['iphrase',p[1][1],p[1][2]] 
+
+def p_iphrase_i_uphrase_rad(p): #成语后跟“的”“地”“得”
+  'iphrase : POS_I uphrase SYN_RAD'
+  p[0] = ['iphrase',p[1][1],p[1][2]]  
+
+def p_LEFT_iphrase_i_uphrase_rad_RIGHT(p):
+  'iphrase : LEFT iphrase RIGHT'
+  p[0] = ['iphrase',p[2][1],p[2][2]]  
 
 def p_error(p):
   print("Syntax error in input:" + str(p))

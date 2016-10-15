@@ -128,7 +128,6 @@ def p_sbvphrase_nphrase_sbv_vphrase(p):#主谓结构,此处主语为名词
 
 def p_sbvphrase_nphrase_sbv_vphrase_error(p):#主谓结构,此处主语为名词
   'sbvphrase : nphrase SYN_SBV error'
-  p[0] = ['sbvphrase',p[3][1],p[3][2]]
   print('error in sbv')
 
 def p_sbvphrase_nphrase_sbv_aphrase(p):#主谓结构，此处谓语为形容词
@@ -164,8 +163,8 @@ def p_vobphrase_vobphrase_uphrase_rad(p):#动宾结构后加语气词
   'vobphrase : vobphrase uphrase SYN_RAD'
   p[0] = ['vobphrase',p[1][1],p[1][2]]
 
-def p_vobphrase_vobphrase_vphrase_coo(p):
-  'vobphrase : vobphrase vphrase SYN_COO'
+def p_vobphrase_vobphrase_vphrase_coo(p): #连动句，上街买菜
+  'vobphrase : vphrase vobphrase SYN_COO'
   p[0] = ['vobphrase',p[1][1],p[1][2]+p[2][2]]
 
 def p_vobphrase_LEFT_RIGHT(p):
@@ -181,8 +180,16 @@ def p_nphrase_aphrase_att_nphrase(p): #定中结构，形容词修饰名词
   'nphrase : aphrase SYN_ATT nphrase'
   p[0] =['nphrase',p[3][1],p[1][2]*p[3][2]]
 
+def p_nphrase_rqphrase_att_nphrase(p): #定中结构，数量词修饰名词
+  'nphrase : rqphrase SYN_ATT nphrase'
+  p[0] = ['nphrase',p[3][1],p[3][2]]
+
 def p_nphrase_nphrase_att_nphrase(p): #定中结构,A的B
   'nphrase : nphrase SYN_ATT nphrase'
+  p[0] = ['nphrase',p[1][1],p[1][2]]
+
+def p_nphrase_vphrase_att_nphrase(p): #定中结构，动词修饰名词
+  'nphrase : vphrase SYN_ATT nphrase'
   p[0] = ['nphrase',p[1][1],p[1][2]]
 
 def p_iphrase_nphrase_att_nphrase(p): #定中结构 成语做形容词
@@ -234,7 +241,7 @@ def p_vphrase_iphrase_adv_vphrase(p):
   p[0] = ['vphrase',p[3][1],p[1][2]*p[3][2]]
 
 def p_vphrase_pobphrase(p):
-  'vphrase : pobphrase SYN_POB vphrase'
+  'vphrase : pobphrase SYN_ADV vphrase'
   p[0] = ['vphrase',p[3][1],p[1][2]*p[3][2]]
 
 '''
@@ -264,7 +271,7 @@ def p_dphrase_d(p):
   'dphrase : dphrase SYN_ADV pobphrase'
   p[0] = ['dphrase',p[1][1],p[1][2]*p[3][2]]
 
-def p_dphrase_d(p):
+def p_dphrase_d(p):  #副词短语
   'dphrase : POS_D'
   p[0] = ['dphrase',p[1][1],p[1][2]]
 
@@ -325,6 +332,10 @@ def p_iphrase_i_uphrase_rad(p): #成语后跟“的”“地”“得”
 def p_LEFT_iphrase_i_uphrase_rad_RIGHT(p):
   'iphrase : LEFT iphrase RIGHT'
   p[0] = ['iphrase',p[2][1],p[2][2]]  
+
+def p_rqphrase_left_r_att_q_right(p):
+  'rqphrase : LEFT POS_R SYN_ATT POS_Q RIGHT'
+  p[0] = ['rqphrase',p[2][1],p[2][2]]
 
 def p_error(p):
   print("Syntax error in input:" + str(p))

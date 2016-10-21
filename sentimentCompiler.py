@@ -26,6 +26,7 @@ reserved ={
 'i':'POS_I',
 'c':'POS_C',
 'j':'POS_J',
+'b':'POS_B',
 'ROOT':'SYN_ROOT',
 'SBV':'SYN_SBV',		
 'ADV':'SYN_ADV',
@@ -38,6 +39,7 @@ reserved ={
 'POB':'SYN_POB',
 'CMP':'SYN_CMP',
 'FOB':'SYN_FOB',
+'LAD':'SYN_LAD',
 '(':'LEFT',
 ')':'RIGHT'
 }
@@ -109,6 +111,7 @@ def p_sentencepart_stc_wpphrase_wp(p):  #第一种情况：分句是第一个分
                    | sentence_part SYN_COO wpphrase SYN_WP'''
   p[0] = ['sentence_part',p[1][1],p[1][2]]
 
+
 def p_sentencepart_sbvphrase(p): #主谓句
   'sentence_part : sbvphrase'
   p[0] = ['sentence_part',p[1][1],p[1][2]]
@@ -137,7 +140,7 @@ def p_sbvphrase_nphrase_sbv_vphrase(p):#主谓结构,此处主语为名词
   'sbvphrase : nphrase SYN_SBV vphrase'
   p[0] = ['sbvphrase',p[3][1],p[3][2]]
 
-def p_sbvphrase_nphrase_sbv_vphrase_error(p):#主谓结构,此处主语为名词
+def p_sbvphrase_nphrase_sbv_vphrase_error(p):#错误
   'sbvphrase : nphrase SYN_SBV error'
   print('error in sbv')
 
@@ -145,10 +148,22 @@ def p_sbvphrase_nphrase_sbv_aphrase(p):#主谓结构，此处谓语为形容词
   'sbvphrase : nphrase SYN_SBV aphrase'
   p[0] =['sbvphrase',p[2][1],p[3][2]]
 
+def p_sbvphrase_vphrase_sbv_vphrase(p): #主谓结构，主语是动词。“工作”
+  'sbvphrase : vphrase SYN_SBV vphrase'
+  p[0] = ['sbvphrase',p[1][1],p[1][2]]
+
+def p_sbvphrase_vobphrase_sbv_vphrase(p): #主语是 动宾结构 “完成祖国统一是大势所趋”
+  'sbvphrase : vobphrase SYN_SBV vphrase'
+  p[0] = ['sbvphrase',p[1][1],p[1][2]]
+
 
 def p_sbvphrase_LEFT_RIGHT(p):
   'sbvphrase : LEFT sbvphrase RIGHT'
   p[0] = ['sbvphrase',p[2][1],p[2][2]]
+
+def p_vobphrase_c_adv_vobphrase(p):  #连词加到vobphrase前面，“并吃瓜”
+  'vobphrase : POS_C SYN_ADV vobphrase'
+  p[0] = ['vobphrase',p[3][1],p[3][2]]
 
 def p_vobphrase_sbvphrase_nphrase_vob(p):
   'vobphrase : sbvphrase nphrase SYN_VOB'
@@ -179,16 +194,21 @@ def p_vobphrase_vobphrase_uphrase_rad(p):#动宾结构后加语气词
   'vobphrase : vobphrase uphrase SYN_RAD'
   p[0] = ['vobphrase',p[1][1],p[1][2]]
 
-def p_vobphrase_vobphrase_vphrase_coo(p): #连动句，上街买菜
+def p_vobphrase_vobphrase_vphrase_coo(p): #连动词，上街买菜
   'vobphrase : vphrase vobphrase SYN_COO'
   p[0] = ['vobphrase',p[1][1],p[1][2]+p[2][2]]
+
 
 def p_vobphrase_v_v_vob(p): #两个动词之间也可能是动宾关系，“推向前进”
   'vobphrase : POS_V POS_V SYN_VOB'
   p[0] = ['vobphrase',p[1][1],p[1][2]*p[2][2]]
 
-def p_vobphrase_v_vobphrase_vob(p): #动词接一个动宾句做宾语，“继续把建设有中国特色社会主义事业推向前进”
+def p_vobphrase_vphrase_vobphrase_vob(p): #动词接一个动宾句做宾语，“继续把建设有中国特色社会主义事业推向前进”
   'vobphrase : vphrase vobphrase SYN_VOB'
+  p[0] = ['vobphrase',p[1][1],p[1][2]*p[2][2]]
+
+def p_vobphrase_vphrase_sbvphrase_vob(p): #“完成祖国统一”
+  'vobphrase : vphrase sbvphrase SYN_VOB'
   p[0] = ['vobphrase',p[1][1],p[1][2]*p[2][2]]
 
 def p_vobphrase_pobphrase_adv_vobphrase(p): #介宾结构修饰动宾结构
@@ -199,17 +219,40 @@ def p_vobphrase_LEFT_RIGHT(p):
   'vobphrase : LEFT vobphrase RIGHT'
   p[0] = ['vobphrase',p[2][1],p[2][2]]
 
-def p_fobphrase_nphrase_fob_pobphrase_adv_vphrase(p):# 前置宾语：凶手被警察抓住了
-  'fobphrase : nphrase SYN_FOB pobphrase SYN_ADV vphrase'
-  p[0] = ['fobphrase',p[5][1],p[1][2]*p[5][2]]
-
+def p_fobphrase_nphrase_fob_vphrase(p): #前置宾语：凶手被抓住了
+  'fobphrase : nphrase SYN_FOB vphrase'
+  p[0] = ['fobphrase',p[1][1],p[1][1]*p[3][1]]
+ 
 def p_nphrase_attphrase_att_nphrase(p): #为何这中间没有依存符号？这是为了单定语和多重定语的统一。attphrase中包含了依存符号。
   'nphrase : attphrase nphrase'
   p[0] = ['nphrase',p[1][1],p[1][2]]
 
+def p_nphrase_attphrase_vphrase(p):  #动词当名词用，"工作"
+  'nphrase : attphrase vphrase'
+  p[0] = ['nphrase',p[1][1],p[1][2]]
+
+
+def p_nphrase_p_lad_nphrase(p): #名词短语左边附加介词，”与某某“
+  'nphrase : POS_P SYN_LAD nphrase'
+  p[0] = ['nphrase',p[3][1],p[3][2]]
+
+def p_nphrase_c_lad_nphrase(p):  #名词短语左边附加连词，”和某某“
+  'nphrase : POS_C SYN_LAD nphrase'
+  p[0] = ['nphrase',p[3][1],p[3][2]]
+
+
+def p_nphrase_nphrase_nphrase_coo(p): #名词短语并列
+  'nphrase : nphrase nphrase SYN_COO'
+  p[0] = ['nphrase',p[1][1],p[1][1]+p[2][1]]
+
+
 def p_nphrase_attphrase_att_q(p): #数量词短语作为名词成分存在。不会有括号把它扩住
   'nphrase : POS_M SYN_ATT POS_Q'
   p[0] = ['nphrase',p[1][1],p[1][2]]
+
+def p_nphrase_a_a_coo(p): # “繁荣稳定”
+  'nphrase : POS_A POS_A SYN_COO'
+  p[0] = ['nphrase',p[1][1],p[1][2]+p[2][2]]
 
 def p_nphrase_nphrase_uphrase_rad(p):#定中结构，右边是语气词（感叹句）
   'nphrase : nphrase uphrase SYN_RAD'
@@ -247,7 +290,6 @@ def p_vphrase_aphrase_adv_vphrase(p): #形容词修饰动词
   'vphrase : aphrase SYN_ADV vphrase'
   p[0] = ['vphrase',p[3][1],p[1][2]*p[3][2]]
 
-
 def p_vphrase_pobphrase(p):
   'vphrase : pobphrase SYN_ADV vphrase'
   p[0] = ['vphrase',p[3][1],p[1][2]*p[3][2]]
@@ -270,6 +312,10 @@ def p_vphrase_v(p):
 def p_vphrase_vphrase_uphrase_rad(p): #动词加的/地
   'vphrase : vphrase uphrase SYN_RAD'
   p[0] = ['vphrase',p[1][1],p[1][2]]
+
+def p_vphrase_c_lad_vphrase(p): #动词短语左接连词 “和现代化“
+  'vphrase : POS_C SYN_LAD vphrase'
+  p[0] = ['vphrase',p[3][1],p[3][2]]
 
 def p_vphrase_LEFT_RIGHT(p):
   'vphrase : LEFT vphrase RIGHT'
@@ -321,6 +367,10 @@ def p_pobphrase_p_pob_nphrase(p):  #介宾短语
   'pobphrase : POS_P objphrase SYN_POB'
   p[0] = ['pobphrase',p[2][1],p[2][2]]
 
+def p_pobphrase_wpphrase(p):  #可能有逗号分割
+  'pobphrase : pobphrase wpphrase SYN_WP'
+  p[0] = ['pobphrase',p[1][1],p[1][2]]
+
 def p_pobphrase_LEFT_RIGHT(p):
   'pobphrase : LEFT pobphrase RIGHT'
   p[0] = ['pobphrase',p[2][1],p[2][2]]
@@ -333,14 +383,21 @@ def p_rqphrase_left_r_att_q_right(p): #这件/这把
   'rqphrase : LEFT POS_R SYN_ATT POS_Q RIGHT'
   p[0] = ['rqphrase',p[2][1],p[2][2]]
 
+def p_rmqphrase_definition_1(p):#这一
+  'rmqphrase : LEFT LEFT POS_R SYN_ATT POS_M RIGHT SYN_ATT POS_Q RIGHT'
+  p[0] = ['rmphrase',p[3][1],p[3][2]]
+
 def p_attphrase_definition(p): #可以做定语的短语。之所以把SYN_ATT也放到attphrase中，是为了实现多重定语。
   '''attphrase : POS_M SYN_ATT
                | mqphrase SYN_ATT
+               | rmqphrase SYN_ATT
                | vobphrase SYN_ATT
                | aphrase SYN_ATT
                | nphrase SYN_ATT
                | vphrase SYN_ATT
-               | rqphrase SYN_ATT'''
+               | rqphrase SYN_ATT
+               | POS_R SYN_ATT
+               | POS_B SYN_ATT'''
   p[0] = ['attphrase',p[1][1],p[1][2]]
 
 def p_obj_definition(p): #可以在介宾结构中做宾语的短语

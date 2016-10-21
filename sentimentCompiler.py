@@ -24,6 +24,8 @@ reserved ={
 'm':'POS_M',
 'q':'POS_Q',
 'i':'POS_I',
+'c':'POS_C',
+'j':'POS_J',
 'ROOT':'SYN_ROOT',
 'SBV':'SYN_SBV',		
 'ADV':'SYN_ADV',
@@ -94,29 +96,38 @@ def p_sentece_left_sentence_right(p):
   'sentence : LEFT sentence RIGHT'
   p[0] = ['sentence',p[2][1],p[2][2]] 
 
-def p_sentence_stc_wpphrase_wp(p):
-  'sentence : sentence wpphrase SYN_WP'
+def p_sentence_sentencepart(p):
+  'sentence : sentence_part'
   p[0] = ['sentence',p[1][1],p[1][2]]
 
-def p_sentence_sbvphrase(p): #主谓句
-  'sentence : sbvphrase'
-  p[0] = ['sentence',p[1][1],p[1][2]]
+def p_sentece_sentence_sentencepart(p):  #复合句的情感值等于两句分句相加
+  'sentence : sentence sentence_part'
+  p[0] = ['sentence',p[1][1],p[1][2] + p[2][2]]
 
-def p_sentence_vobphrase(p):#动宾句
-  'sentence : vobphrase'
-  p[0] = ['sentence',p[1][1],p[1][2]]
+def p_sentencepart_stc_wpphrase_wp(p):  #第一种情况：分句是第一个分句。第二种情况 ： 分句是第一个分句之后的分句。
+  '''sentence_part : sentence_part wpphrase SYN_WP
+                   | sentence_part SYN_COO wpphrase SYN_WP'''
+  p[0] = ['sentence_part',p[1][1],p[1][2]]
 
-def p_sentence_nphrase(p):#定中结构句（多么漂亮的彩虹啊）
-  'sentence : nphrase'
-  p[0] = ['sentence',p[1][1],p[1][2]]
+def p_sentencepart_sbvphrase(p): #主谓句
+  'sentence_part : sbvphrase'
+  p[0] = ['sentence_part',p[1][1],p[1][2]]
 
-def p_sentence_fobphrase(p):
-  'sentence : fobphrase'
-  p[0] = ['sentence',p[1][1],p[1][2]]
+def p_sentencepart_vobphrase(p):#动宾句
+  'sentence_part : vobphrase'
+  p[0] = ['sentence_part',p[1][1],p[1][2]]
 
-def p_sentence_vphrase(p):
-  'sentence : vphrase'
-  p[0] = ['sentence',p[1][1],p[1][2]]
+def p_sentencepart_nphrase(p):#定中结构句（多么漂亮的彩虹啊）
+  'sentence_part : nphrase'
+  p[0] = ['sentence_part',p[1][1],p[1][2]]
+
+def p_sentencepart_fobphrase(p): #前置宾语句
+  'sentence_part : fobphrase'
+  p[0] = ['sentence_part',p[1][1],p[1][2]]
+
+def p_sentencepart_vphrase(p):
+  'sentence_part : vphrase'
+  p[0] = ['sentence_part',p[1][1],p[1][2]]
 
 def p_wpphrase_wp(p):
   'wpphrase : POS_WP'
@@ -143,6 +154,11 @@ def p_vobphrase_sbvphrase_nphrase_vob(p):
   'vobphrase : sbvphrase nphrase SYN_VOB'
   p[0] = ['vobphrase',p[2][1],p[1][2]*p[2][2]]
 
+def p_vobphrase_sbvphrase_vobphrase_vob(p): #主宾句接动宾句做宾语，“中国政府顺利恢复对香港行使主权”
+  'vobphrase : sbvphrase vobphrase SYN_VOB'
+  p[0] = ['vobphrase',p[2][1],p[1][2]*p[2][2]]
+
+
 def p_vobphrase_sbvphrase_nphrase_vob_error(p):
   'vobphrase : sbvphrase error SYN_VOB'
   print('error in VOB!')
@@ -167,34 +183,33 @@ def p_vobphrase_vobphrase_vphrase_coo(p): #连动句，上街买菜
   'vobphrase : vphrase vobphrase SYN_COO'
   p[0] = ['vobphrase',p[1][1],p[1][2]+p[2][2]]
 
+def p_vobphrase_v_v_vob(p): #两个动词之间也可能是动宾关系，“推向前进”
+  'vobphrase : POS_V POS_V SYN_VOB'
+  p[0] = ['vobphrase',p[1][1],p[1][2]*p[2][2]]
+
+def p_vobphrase_v_vobphrase_vob(p): #动词接一个动宾句做宾语，“继续把建设有中国特色社会主义事业推向前进”
+  'vobphrase : vphrase vobphrase SYN_VOB'
+  p[0] = ['vobphrase',p[1][1],p[1][2]*p[2][2]]
+
+def p_vobphrase_pobphrase_adv_vobphrase(p): #介宾结构修饰动宾结构
+  'vobphrase : pobphrase SYN_ADV vobphrase'
+  p[0] = ['vobphrase',p[1][1],p[1][2]*p[3][2]]
+
 def p_vobphrase_LEFT_RIGHT(p):
   'vobphrase : LEFT vobphrase RIGHT'
   p[0] = ['vobphrase',p[2][1],p[2][2]]
 
-def p_fobphrase_nphrase_fob_pobphrase_adv_vphrase(p):# 前置宾语：凶手被抓住了
+def p_fobphrase_nphrase_fob_pobphrase_adv_vphrase(p):# 前置宾语：凶手被警察抓住了
   'fobphrase : nphrase SYN_FOB pobphrase SYN_ADV vphrase'
   p[0] = ['fobphrase',p[5][1],p[1][2]*p[5][2]]
 
-
-def p_nphrase_aphrase_att_nphrase(p): #定中结构，形容词修饰名词
-  'nphrase : aphrase SYN_ATT nphrase'
-  p[0] =['nphrase',p[3][1],p[1][2]*p[3][2]]
-
-def p_nphrase_rqphrase_att_nphrase(p): #定中结构，数量词修饰名词
-  'nphrase : rqphrase SYN_ATT nphrase'
-  p[0] = ['nphrase',p[3][1],p[3][2]]
-
-def p_nphrase_nphrase_att_nphrase(p): #定中结构,A的B
-  'nphrase : nphrase SYN_ATT nphrase'
+def p_nphrase_attphrase_att_nphrase(p): #为何这中间没有依存符号？这是为了单定语和多重定语的统一。attphrase中包含了依存符号。
+  'nphrase : attphrase nphrase'
   p[0] = ['nphrase',p[1][1],p[1][2]]
 
-def p_nphrase_vphrase_att_nphrase(p): #定中结构，动词修饰名词
-  'nphrase : vphrase SYN_ATT nphrase'
+def p_nphrase_attphrase_att_q(p): #数量词短语作为名词成分存在。不会有括号把它扩住
+  'nphrase : POS_M SYN_ATT POS_Q'
   p[0] = ['nphrase',p[1][1],p[1][2]]
-
-def p_iphrase_nphrase_att_nphrase(p): #定中结构 成语做形容词
-  'nphrase : iphrase SYN_ATT nphrase'
-  p[0] = ['nphrase',p[1][1],p[1][2]*p[3][2]]
 
 def p_nphrase_nphrase_uphrase_rad(p):#定中结构，右边是语气词（感叹句）
   'nphrase : nphrase uphrase SYN_RAD'
@@ -212,21 +227,13 @@ def p_nphrase_r(p): #名词性词组也可以是代词
   'nphrase : POS_R'
   p[0] = ['nphrase',p[1][1],p[1][2]]
 
-def p_nphrase_vobphrase_att_nphrase(p):
-  'nphrase : vobphrase SYN_ATT nphrase'
-  p[0] = ['nphrase',p[3][1],p[1][2]+p[3][2]]
+def p_nphrase_j(p):#缩略词可以做名词成分
+  'nphrase : POS_J'
+  p[0] = ['nphrase',p[1][1],p[1][2]]
 
-def p_nphrase_vobphrase_att_nphrase_error(p):
-  'nphrase : vobphrase SYN_ATT error'
-  print('error in vob att nphrase')
-
-def p_nphrase_pos_m__att_nphrase(p): #数词修饰名词（ltp会把“一个”作为数词）
-  'nphrase : POS_M SYN_ATT nphrase'
-  p[0] = ['nphrase',p[3][1],p[3][2]]
-
-def p_nphrase_mqphrase_att_nphrase(p): #数量词修饰名词
-  'nphrase : mqphrase SYN_ATT nphrase'
-  p[0] = ['nphrase',p[3][1],p[3][2]]
+def p_nphrase_i(p):#成语可以做名词成分
+  'nphrase : POS_I'
+  p[0] = ['nphrase',p[1][1],p[1][2]]
 
 def p_nphrase_left_right(p):
   'nphrase : LEFT nphrase RIGHT'
@@ -236,9 +243,10 @@ def p_vphrase_dphrase_adv_vphrase(p):
   'vphrase : dphrase SYN_ADV vphrase'
   p[0] = ['vphrase',p[3][1],p[1][2]*p[3][2]]
 
-def p_vphrase_iphrase_adv_vphrase(p):
-  'vphrase : iphrase SYN_ADV vphrase'
+def p_vphrase_aphrase_adv_vphrase(p): #形容词修饰动词
+  'vphrase : aphrase SYN_ADV vphrase'
   p[0] = ['vphrase',p[3][1],p[1][2]*p[3][2]]
+
 
 def p_vphrase_pobphrase(p):
   'vphrase : pobphrase SYN_ADV vphrase'
@@ -267,7 +275,7 @@ def p_vphrase_LEFT_RIGHT(p):
   'vphrase : LEFT vphrase RIGHT'
   p[0] = ['vphrase',p[2][1],p[2][2]]
 
-def p_dphrase_d(p):
+def p_dphrase_d_adv_pobphrase(p):
   'dphrase : dphrase SYN_ADV pobphrase'
   p[0] = ['dphrase',p[1][1],p[1][2]*p[3][2]]
 
@@ -310,32 +318,39 @@ def p_aphrase_LEFT_RIGHT(p):
   p[0] = ['aphrase',p[2][1],p[2][2]]
 
 def p_pobphrase_p_pob_nphrase(p):  #介宾短语
-  'pobphrase : POS_P nphrase SYN_POB'
+  'pobphrase : POS_P objphrase SYN_POB'
   p[0] = ['pobphrase',p[2][1],p[2][2]]
 
 def p_pobphrase_LEFT_RIGHT(p):
   'pobphrase : LEFT pobphrase RIGHT'
   p[0] = ['pobphrase',p[2][1],p[2][2]]
 
-def p_mqphrase_m_att_q(p): #数量词短语
-  'mqphrase : POS_M SYN_ATT POS_Q'
-  p[0] = ['mqphrase',p[1][1],p[1][2]]
+def p_mqphrase_m_att_q(p): #数量词短语做修饰成分，如果它是做修饰成分的，必然会有括号把它扩住。
+  'mqphrase : LEFT POS_M SYN_ATT POS_Q RIGHT'
+  p[0] = ['mqphrase',p[2][1],p[2][2]]
 
-def p_iphrase_i(p):   #成语
-  'iphrase : POS_I'
-  p[0] = ['iphrase',p[1][1],p[1][2]] 
-
-def p_iphrase_i_uphrase_rad(p): #成语后跟“的”“地”“得”
-  'iphrase : POS_I uphrase SYN_RAD'
-  p[0] = ['iphrase',p[1][1],p[1][2]]  
-
-def p_LEFT_iphrase_i_uphrase_rad_RIGHT(p):
-  'iphrase : LEFT iphrase RIGHT'
-  p[0] = ['iphrase',p[2][1],p[2][2]]  
-
-def p_rqphrase_left_r_att_q_right(p):
+def p_rqphrase_left_r_att_q_right(p): #这件/这把
   'rqphrase : LEFT POS_R SYN_ATT POS_Q RIGHT'
   p[0] = ['rqphrase',p[2][1],p[2][2]]
+
+def p_attphrase_definition(p): #可以做定语的短语。之所以把SYN_ATT也放到attphrase中，是为了实现多重定语。
+  '''attphrase : POS_M SYN_ATT
+               | mqphrase SYN_ATT
+               | vobphrase SYN_ATT
+               | aphrase SYN_ATT
+               | nphrase SYN_ATT
+               | vphrase SYN_ATT
+               | rqphrase SYN_ATT'''
+  p[0] = ['attphrase',p[1][1],p[1][2]]
+
+def p_obj_definition(p): #可以在介宾结构中做宾语的短语
+  'objphrase : sentence_part'
+  p[0] = ['objphrase',p[1][1],p[1][2]]
+
+
+def p_attphrase_repeat(p):  #多重定语
+  'attphrase : attphrase SYN_ATT attphrase SYN_ATT'
+  p[0] = ['attphrase',p[1][1],p[1][2]+p[3][2]]
 
 def p_error(p):
   print("Syntax error in input:" + str(p))

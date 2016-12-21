@@ -1,22 +1,30 @@
 # encoding=utf-8
 import Queue
-
-
-def change_position(array,start,end):
-  if(start >= end):
-    return
-  for i in range(start,(end + start)/2+1):
-     temp = array[i]
-     array[i] = array[start+end-i]
-     array[start+end-i] = temp
-     
-
-sentiment_dict = {'打':1.0,'人':2.0,'事':1.5}
-
+import sys
 from pyltp import Segmentor
+
+sentiment_dict = {}
+count=0
+with open("/home/cm/pyfiles/dict/sentimentDict.txt",'r') as f:
+  lines = f.readlines()
+  for line in lines:
+    split_result = line.split()
+    word = split_result[0]
+    value = float(split_result[1])
+    sentiment_dict[word] = value
+	
+
+with open("/home/cm/pyfiles/dict/fanZhuanCi.txt",'r') as f:
+  lines = f.readlines()
+  for line in lines:
+    word = line
+    value = -1.0
+    sentiment_dict[word] = value
+
+sentence = sys.argv[1]
 segmentor = Segmentor()
 segmentor.load_with_lexicon('/home/cm/pyfiles/ltpmodel/ltp_data/cws.model','/home/cm/pyfiles/dict/外部词典.txt')
-words = segmentor.segment('各项工作必须以经济建设为中心。')
+words = segmentor.segment(sentence)
 words = list(words)
 print '\t'.join(words)
 
@@ -74,11 +82,13 @@ for i in range(len(arcs)):
   max_pos = max(subtree_list)
   min_pos = min(subtree_list)-1
   if(arcs[i].head > i+1): #如果父节点在当前节点右边
-    position_relation_list.append([max_pos,')' + ' ' + str(arcs[i].relation)])
+    position_relation_list.append([max_pos,str(arcs[i].relation)])
+    position_relation_list.append([max_pos,')']) 
     position_relation_list.append([min_pos,'('])
-  else:
+  else:  #如果父节点在当前节点左边
     position_relation_list.append([max_pos,')'])
-    position_relation_list.append([min_pos,str(arcs[i].relation) + ' ' + '('])
+    position_relation_list.append([min_pos,'('])
+    position_relation_list.append([min_pos,str(arcs[i].relation)])
 
 
 
@@ -88,7 +98,7 @@ position_relation_list.sort(key = lambda x:x[0])
 
 print " ".join("%d:%s" %(p_l[0],p_l[1]) for p_l in position_relation_list)
 
-#因为插入顺序是从左至右的，故同一位置上插入多个“）”+依存符号，或者是单个的‘）’，必然是父亲节点的先插入，但父节点的括号应该在子节点的右边，故要交换。另外，同一位置上如果有‘（’，那么‘（’必然是在‘）’后插入的，这里不必交换。如果同一位置上有多个 依存符号 +‘（’ ，或单独的 ‘（’，则必然是父节点后插入，需要交换。如果同一位置上还有一个单独的一寸副，则它必然是在‘）’的右边，无需交换。
+#因为插入顺序是从左至右的，故同一位置上插入多个） 和依存符号，或者是单个的‘）’，必然是父亲节点的先插入，但父节点的括号应该在子节点的右边，故要交换。另外，同一位置上如果有‘（’，那么‘（’必然是在‘）’后插入的，这里不必交换。
 i=0
 order_list = [-1]
 for i in range(len(position_relation_list)-1):
@@ -100,18 +110,29 @@ print(order_list)
 
 i=0
 
+
 for i in range(len(order_list)-1):
-  for j in range(order_list[i]+1,order_list[i+1]+1):  #range(a,b):从a开始，b-1结束。
-    if(position_relation_list[j][1][0] != ')' ):
-      center = j-1 if(j -1 >= order_list[i]+1)   else order_list[i]
-      change_position(position_relation_list,order_list[i]+1,center)
-      change_position(position_relation_list,center+1,order_list[i+1])
-      break;
-    if(j==order_list[i+1]):
-      change_position(position_relation_list,order_list[i]+1,order_list[i+1]);
+  symbol_dict = {'(':0,')':0}
+  syn = None
+  for j in range(order_list[i]+1,order_list[i+1]+1): #统计“）”和“（”数目
+    if(symbol_dict.get(position_relation_list[j][1])!=None):  
+      symbol_dict[position_relation_list[j][1]]+=1
+    else:
+      syn =  position_relation_list[j][1]
+
+  #重新排列，同一位置上如果有同时有“（” “）” 依存符号 必然是按 ） 依存符号 （ 的顺序排列。且依存符号只可能有一个。
+  for j in range(symbol_dict[')']): 
+    position_relation_list[order_list[i]+1+j][1] = ')'
+
+  if(syn!=None):
+    position_relation_list[order_list[i]+1+symbol_dict[')']][1] = syn
+  
+  for j in range(symbol_dict['(']):
+    position_relation_list[order_list[i+1]-j][1] = '('
 
 i=0
-
+print('\n')
+print(str(symbol_dict['(']) + "   " + str(symbol_dict[')']) + "   ")
 print " ".join("%d:%s" %(p_l[0],p_l[1]) for p_l in position_relation_list)
 
 #插入依存符号和括号

@@ -71,8 +71,6 @@ def t_error(t):
 
 lexer = lex.lex()
 
-#data = 'ROOT n|0|0.4 SBV d|1|1.3 ADV v|2|0.8 n|3|0.0 SBV v|4|-0.4 n|5|-0.1  VOB u|6|0.0 RAD ATT n|7|0.0 VOB wp|8|0.0 WP HED'
-
 f = open('/home/cm/pyfiles/text/序列化文本.txt')
 data = f.readline()
 f.close()
@@ -91,7 +89,7 @@ import ply.yacc as yacc
 
 ################### 句子主干部分 ###########################
 
-def p_finalsentece_hed_sentence(p):
+def p_final_sentece_hed_sentence(p):
   'final_sentence : SYN_HED LEFT sentence RIGHT'
   p[0] = ['final_sentence',p[3][1],p[3][2]] 
 
@@ -122,15 +120,15 @@ def p_senetence_subject(p): #仅主语
 
 def p_sentence_content_subject_sbv_predicate(p):  #主谓
   'sentence_content : subject SYN_SBV predicate'  
-  p[0] = ['sentence_content', p[1][1], p[1][2]*p[3][2]]
+  p[0] = ['sentence_content', p[1][1], p[1][2]+p[3][2]]
 
 def p_sentence_content_subject_sbv_predicate_vob_object(p): #主谓宾
   'sentence_content : subject SYN_SBV predicate SYN_VOB object'
-  p[0] = ['sentence_content', p[1][1], p[1][2]*p[3][2]*p[5][2]]
+  p[0] = ['sentence_content', p[1][1], p[1][2]+p[3][2]*p[5][2]]
 
 def p_sentence_content_left_subject_right_wp_sbv_predicate_vob_object(p): #主谓宾,但是主语和谓语用逗号分开
   'sentence_content : LEFT subject SYN_WP POS_WP RIGHT SYN_SBV predicate SYN_VOB object'
-  p[0] = ['sentence_content', p[2][1], p[2][2]*p[7][2]*p[9][2]]
+  p[0] = ['sentence_content', p[2][1], p[2][2]+p[7][2]*p[9][2]]
 
 def p_sentence_content_predicate_vob_object(p):  #谓宾(祈使句)
   'sentence_content : predicate SYN_VOB object'
@@ -163,7 +161,7 @@ def p_object(p):
 
 def p_sbvphrase(p):  #必然有左右括号。
   'sbvphrase : LEFT subject SYN_SBV vphrase RIGHT'
-  p[0] = ['sbvphrase',p[2][1],p[2][2]*p[4][2]]
+  p[0] = ['sbvphrase',p[2][1],p[2][2]+p[4][2]]
   
 
 ###################### vobphrase ########################
@@ -191,13 +189,13 @@ def p_innervob_c_adv_innervob(p):  #连词加到innervob前面，“并吃瓜”
 #主谓宾结构
 def p_sbv_vob_phrase(p):
   'sbv_vob_phrase : LEFT subject SYN_SBV vphrase SYN_VOB object RIGHT'
-  p[0] = ['sbv_vob_phrase',p[2][1],p[2][2]]
+  p[0] = ['sbv_vob_phrase',p[2][1],p[2][2] + p[4][2] * p[6][2]]
   
 ###################### nphrase ##########################
 
 def p_nphrase_attphrase_att_nphrase(p): 
   'nphrase : attphrase SYN_ATT nphrase'
-  p[0] = ['nphrase',p[1][1],p[1][2]*p[3][2]]
+  p[0] = ['nphrase',p[1][1],p[1][2]+p[3][2]]
 
 def p_nphrase_attphrase_vphrase(p):  #动词当名词用，"工作","改革"
   'nphrase : attphrase SYN_ATT vphrase'
@@ -402,6 +400,7 @@ def p_rqphrase_left_r_att_q_right(p): #这件/这把
 
 def p_rmqphrase_definition_1(p):#这一把
   'rmqphrase : LEFT LEFT POS_R SYN_ATT POS_M RIGHT SYN_ATT POS_Q RIGHT'
+  p[0] = ['rmqphrase',p[2][1],p[3][2]]
 
 def p_error(p):
   print("Syntax error in input:" + str(p))
@@ -410,25 +409,6 @@ def p_error(p):
 parser = yacc.yacc()
 result = parser.parse(data)  
 print(result)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -71,7 +71,7 @@ def t_error(t):
 
 lexer = lex.lex()
 
-f = open('/home/cm/pyfiles/text/序列化文本.txt')
+f = open('./text/序列化文本.txt')
 data = f.readline()
 f.close()
 
@@ -308,23 +308,21 @@ def p_vphrase_vobphrase_vphrase_coo(p): #连动词，上街买菜
   p[0] = ['vobphrase',p[1][1],p[1][2]+p[3][2]]
 
 #################### dphrase ########################
-
-def p_dphrase_d_adv_pobphrase(p):
-  'dphrase : dphrase SYN_ADV pobphrase'
-  p[0] = ['dphrase',p[1][1],p[1][2]*p[3][2]]
-
 def p_dphrase_d(p):  #副词短语
   'dphrase : POS_D'
   p[0] = ['dphrase',p[1][1],p[1][2]]
 
-def p_dphrase_uphrase_rad(p):
-  'dphrase : dphrase SYN_RAD uphrase'
-  p[0] = ['dphrase',p[1][1],p[1][2]]
-
 def p_dphrase_LEFT_dphrase_RIGHT(p):
-  'dphrase : LEFT dphrase RIGHT'
+  'dphrase : LEFT inner_dphrase RIGHT'
   p[0] = ['dphrase',p[2][1],p[2][2]]
 
+def p_dphrase_d_adv_pobphrase(p):
+  'inner_dphrase  : POS_D SYN_ADV pobphrase'
+  p[0] = ['dphrase',p[1][1],p[1][2]*p[3][2]]
+
+def p_dphrase_uphrase_rad(p):
+  'inner_dphrase : POS_D SYN_RAD uphrase'
+  p[0] = ['dphrase',p[1][1],p[1][2]]
 
 ###################### uphrase #######################
 
@@ -360,15 +358,15 @@ def p_aphrase_LEFT_RIGHT(p):
 ####################### pobphrase #####################
 
 def p_pobphrase_p_pob_nphrase(p):  #介宾短语
-  'pobphrase : POS_P SYN_POB object'
+  'inner_pobphrase : POS_P SYN_POB object'
   p[0] = ['pobphrase',p[3][1],p[3][2]]
 
 def p_pobphrase_wpphrase(p):  #可能有逗号分割
-  'pobphrase : pobphrase SYN_WP POS_WP'
+  'inner_pobphrase : inner_pobphrase SYN_WP POS_WP'
   p[0] = ['pobphrase',p[1][1],p[1][2]]
 
 def p_pobphrase_LEFT_RIGHT(p):
-  'pobphrase : LEFT pobphrase RIGHT'
+  'pobphrase : LEFT inner_pobphrase RIGHT'
   p[0] = ['pobphrase',p[2][1],p[2][2]]
 
 
@@ -387,6 +385,7 @@ def p_attphrase_definition(p): #可以做定语的短语。
                | sbv_vob_phrase 
  	       | sbvphrase '''
   p[0] = ['attphrase',p[1][1],p[1][2]]
+
 
 ################ 数量词短语 #####################################
 

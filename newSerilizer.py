@@ -5,7 +5,7 @@ from pyltp import Segmentor
 
 sentiment_dict = {}
 count=0
-with open("/home/cm/pyfiles/dict/sentimentDict.txt",'r') as f:
+with open("./dict/sentimentDict.txt",'r') as f:
   lines = f.readlines()
   for line in lines:
     split_result = line.split()
@@ -14,7 +14,7 @@ with open("/home/cm/pyfiles/dict/sentimentDict.txt",'r') as f:
     sentiment_dict[word] = value
 	
 
-with open("/home/cm/pyfiles/dict/fanZhuanCi.txt",'r') as f:
+with open("./dict/fanZhuanCi.txt",'r') as f:
   lines = f.readlines()
   for line in lines:
     word = line
@@ -23,7 +23,7 @@ with open("/home/cm/pyfiles/dict/fanZhuanCi.txt",'r') as f:
 
 sentence = sys.argv[1]
 segmentor = Segmentor()
-segmentor.load_with_lexicon('/home/cm/pyfiles/ltpmodel/ltp_data/cws.model','/home/cm/pyfiles/dict/外部词典.txt')
+segmentor.load_with_lexicon('./ltpmodel/ltp_data/cws.model','/home/cm/pyfiles/dict/外部词典.txt')
 words = segmentor.segment(sentence)
 words = list(words)
 print '\t'.join(words)
@@ -31,14 +31,14 @@ print '\t'.join(words)
 
 from pyltp import Postagger
 postagger = Postagger() 
-postagger.load('/home/cm/pyfiles/ltpmodel/ltp_data/pos.model')  
+postagger.load('./ltpmodel/ltp_data/pos.model')  
 postags = postagger.postag(words)  
 print '\t'.join(postags)
 postagger.release()
 
 from pyltp import Parser
 parser = Parser() 
-parser.load('/home/cm/pyfiles/ltpmodel/ltp_data/parser.model')  
+parser.load('./ltpmodel/ltp_data/parser.model')  
 arcs = parser.parse(words, postags)  
 print "\t".join("%d:%s" % (arc.head, arc.relation) for arc in arcs)
 parser.release()  
@@ -146,7 +146,7 @@ print " ".join("%d:%s" %(p_l[0],p_l[1]) for p_l in position_relation_list)
 print " ".join(words)
 print " ".join(word_infos)
 
-f = open(r'/home/cm/pyfiles/text/序列化文本.txt','w')
+f = open(r'./text/序列化文本.txt','w')
 f.write(' '.join(word_infos))
 f.close()
 

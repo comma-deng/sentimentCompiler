@@ -198,7 +198,6 @@ def p_vobphrase_vobphrase_vphrase_coo(p): #连动词，上街买菜
   'vobphrase : vphrase vobphrase SYN_COO'
   p[0] = ['vobphrase',p[1][1],p[1][2]+p[2][2]]
 
-
 def p_vobphrase_v_v_vob(p): #两个动词之间也可能是动宾关系，“推向前进”
   'vobphrase : POS_V POS_V SYN_VOB'
   p[0] = ['vobphrase',p[1][1],p[1][2]*p[2][2]]
@@ -231,6 +230,9 @@ def p_nphrase_attphrase_vphrase(p):  #动词当名词用，"工作"
   'nphrase : attphrase vphrase'
   p[0] = ['nphrase',p[1][1],p[1][2]]
 
+def p_nphrase_attphrase_aphrase(p):#形容词当名词用，“喜悦”
+  'nphrase : attphrase aphrase'
+  p[0] = ['nphrase',p[1][1],p[1][2]]
 
 def p_nphrase_p_lad_nphrase(p): #名词短语左边附加介词，”与某某“
   'nphrase : POS_P SYN_LAD nphrase'
@@ -240,11 +242,9 @@ def p_nphrase_c_lad_nphrase(p):  #名词短语左边附加连词，”和某某�
   'nphrase : POS_C SYN_LAD nphrase'
   p[0] = ['nphrase',p[3][1],p[3][2]]
 
-
 def p_nphrase_nphrase_nphrase_coo(p): #名词短语并列
   'nphrase : nphrase nphrase SYN_COO'
   p[0] = ['nphrase',p[1][1],p[1][1]+p[2][1]]
-
 
 def p_nphrase_attphrase_att_q(p): #数量词短语作为名词成分存在。不会有括号把它扩住
   'nphrase : POS_M SYN_ATT POS_Q'
@@ -383,7 +383,7 @@ def p_rqphrase_left_r_att_q_right(p): #这件/这把
   'rqphrase : LEFT POS_R SYN_ATT POS_Q RIGHT'
   p[0] = ['rqphrase',p[2][1],p[2][2]]
 
-def p_rmqphrase_definition_1(p):#这一
+def p_rmqphrase_definition_1(p):#这一把
   'rmqphrase : LEFT LEFT POS_R SYN_ATT POS_M RIGHT SYN_ATT POS_Q RIGHT'
   p[0] = ['rmphrase',p[3][1],p[3][2]]
 
